@@ -30,22 +30,31 @@
 		if (oldLength !== files.files.length) goto("/convert");
 	};
 
-	onMount(() => {
-		const handler = (e: Event) => {
-			e.preventDefault();
-			return false;
-		};
+	const handleDrop = (e: DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const droppedFiles = e.dataTransfer?.files;
+		if (droppedFiles && droppedFiles.length > 0) {
+			const oldLength = files.files.length;
+			files.add(droppedFiles);
+			if (oldLength !== files.files.length) goto("/convert");
+		}
+	};
 
-		uploaderButton?.addEventListener("dragover", handler);
-		uploaderButton?.addEventListener("dragenter", handler);
-		uploaderButton?.addEventListener("dragleave", handler);
-		uploaderButton?.addEventListener("drop", handler);
+	const handleDragOver = (e: DragEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+	};
+
+	onMount(() => {
+		if (!uploaderButton) return;
+
+		uploaderButton.addEventListener("dragover", handleDragOver as EventListener);
+		uploaderButton.addEventListener("drop", handleDrop as EventListener);
 
 		return () => {
-			uploaderButton?.removeEventListener("dragover", handler);
-			uploaderButton?.removeEventListener("dragenter", handler);
-			uploaderButton?.removeEventListener("dragleave", handler);
-			uploaderButton?.removeEventListener("drop", handler);
+			uploaderButton?.removeEventListener("dragover", handleDragOver as EventListener);
+			uploaderButton?.removeEventListener("drop", handleDrop as EventListener);
 		};
 	});
 </script>
